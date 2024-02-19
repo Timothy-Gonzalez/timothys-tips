@@ -1,0 +1,80 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "C: make",
+      "type": "shell",
+      "command": "make",
+      "group": {
+        "kind": "build"
+      }
+    },
+    {
+      "label": "C: make debug",
+      "type": "shell",
+      "command": "make debug",
+      "group": {
+        "kind": "build"
+      }
+    },
+    {
+      "label": "C: make test",
+      "type": "shell",
+      "command": "make test",
+      "group": {
+        "kind": "build"
+      }
+    },
+    {
+      "label": "C: make clean",
+      "type": "shell",
+      "command": "make clean",
+      "group": {
+        "kind": "none"
+      }
+    },
+    {
+      "label": "C: run",
+      "type": "shell",
+      "command": "./shell-debug",
+      "dependsOn": "C: make debug",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build"
+      }
+    },
+    {
+      "label": "C: run valgrind",
+      "type": "shell",
+      "command": "valgrind --leak-check=full ./shell-debug",
+      "dependsOn": "C: make debug",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build"
+      }
+    },
+    {
+      "label": "C: run tests",
+      "type": "shell",
+      "command": "./shell-test",
+      "dependsOn": "C: make test",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "C: run valgrind tests",
+      "type": "shell",
+      "command": "valgrind --leak-check=full ./shell-test",
+      "dependsOn": "C: make test",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build"
+      }
+    }
+  ]
+}
