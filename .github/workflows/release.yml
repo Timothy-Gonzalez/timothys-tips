@@ -52,7 +52,7 @@ jobs:
           if [ -f README.md ]; then
             mv README.md README_Timothys_Tips.md
           fi
-          tar -cf ${GITHUB_WORKSPACE}/staging/${converted_path}.tar *
+          tar -cf ${GITHUB_WORKSPACE}/staging/${converted_path}.tar $(find . -name '*' -printf '%P\n')
           zip -r ${GITHUB_WORKSPACE}/staging/${converted_path}.zip .
 
       - name: Upload tar to release
