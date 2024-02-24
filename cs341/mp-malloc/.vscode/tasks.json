@@ -1,0 +1,44 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "C: make all",
+      "type": "shell",
+      "command": "make all",
+      "group": {
+        "kind": "build"
+      }
+    },
+    {
+      "label": "C: make clean",
+      "type": "shell",
+      "command": "make clean",
+      "group": {
+        "kind": "none"
+      }
+    },
+    {
+      "label": "C: run all",
+      "type": "shell",
+      "command": "./run_all_mcontest.sh",
+      "dependsOn": "C: make all",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build"
+      }
+    },
+    {
+      "label": "C: run",
+      "type": "shell",
+      "command": "./mreplace testers_exe/tester-2",
+      "dependsOn": "C: make all",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ]
+}

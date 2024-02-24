@@ -34,6 +34,7 @@ jobs:
       matrix:
         path:
           - cs341/mp-shell
+          - cs341/mp-malloc
 
     steps:
       - uses: actions/checkout@v4
