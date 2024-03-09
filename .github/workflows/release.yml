@@ -35,6 +35,7 @@ jobs:
         path:
           - cs341/mp-shell
           - cs341/mp-malloc
+          - cs341/mp-password-cracker
 
     steps:
       - uses: actions/checkout@v4
