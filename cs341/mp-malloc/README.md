@@ -41,4 +41,9 @@ curl -sSL https://github.com/Timothy-Gonzalez/timothys-tips/releases/latest/down
   which will make finding a free block MUCH faster
 - Splitting & coalescing are a huge optimization - make sure you implement them correctly
   - If you implement only one without the other, this will cause you to timeout / overuse heap
-- More to come
+- **VERY IMPORTANT**: Get splitting and coalescing working **first**. Do not try to be smart - **split in malloc and coalesce in free**
+  - If you try to do this anywhere else, and don't do it perfectly - you will make debugging impossible
+  - For example: you can't just add split or coalesce to realloc unless you do something else
+- TLDR: Keep it simple, stupid. Get it working, than get your #1 spot on the leaderboard if you want to.
+- Make sure you're using linked lists properly. It's half of this MP and spending 5 hours debugging to learn you don't handle head properly is not fun.
+- Make functions for you lls, like `add_to_free_list` `remove_from_free_list`. Don't write duplicate code.
