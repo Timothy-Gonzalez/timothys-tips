@@ -2,7 +2,7 @@
 
 # MP Malloc
 
-[![Assignment Page](https://img.shields.io/badge/Assignment-malloc-darkgreen?style=for-the-badge)](https://cs341.cs.illinois.edu/assignments/malloc.html)
+[![Assignment Page](https://img.shields.io/badge/Assignment-malloc-0c0?style=for-the-badge)](https://cs341.cs.illinois.edu/assignments/malloc.html)
 
 </div>
 

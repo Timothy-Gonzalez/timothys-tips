@@ -2,7 +2,7 @@
 
 # MP Password Cracker
 
-[![Assignment Page](https://img.shields.io/badge/Assignment-Password%20Cracker-blue?style=for-the-badge)](https://cs341.cs.illinois.edu/assignments/password_cracker.html)
+[![Assignment Page](https://img.shields.io/badge/Assignment-Password_Cracker-seagreen?style=for-the-badge)](https://cs341.cs.illinois.edu/assignments/password_cracker.html)
 
 </div>
 
@@ -19,7 +19,7 @@ curl -sSL https://github.com/Timothy-Gonzalez/timothys-tips/releases/latest/down
 1. A visual debugger and several tasks are provided
 2. The debugger can be used by using the debugging tab in vscode like normal
 3. Tasks can be run using `Ctrl + Shift + P > Run Task`, or `Ctrl + Shift + B` to run a default task (which can be changed)
-  a. These tasks let you compile & run your code without typing commands to do so
+   a. These tasks let you compile & run your code without typing commands to do so
 
 # Version 1 Tips
 
