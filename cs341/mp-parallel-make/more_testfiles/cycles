@@ -1,0 +1,11 @@
+a: d
+	echo "a"
+
+b: c
+	echo "b: this should never run"
+
+c: b d
+	echo "c: this should never run"
+
+d:
+	echo "d"

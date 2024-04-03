@@ -36,6 +36,7 @@ jobs:
           - cs341/mp-shell
           - cs341/mp-malloc
           - cs341/mp-password-cracker
+          - cs341/mp-parallel-make
 
     steps:
       - uses: actions/checkout@v4

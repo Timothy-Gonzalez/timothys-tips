@@ -23,3 +23,8 @@
  * password_cracker
  * CS 341 - Spring 2024
  */
+
+/**
+ * parallel_make
+ * CS 341 - Spring 2024
+ */
