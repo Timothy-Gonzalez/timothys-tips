@@ -10,3 +10,13 @@
 [![CS341](https://img.shields.io/badge/CS341-yellow?style=for-the-badge)](./cs341/)
 
 </div>
+
+# Why
+
+I find that I learn best by trying to explain things to others.
+Most of these tips were created by trying to figure out the concepts of these courses.
+As such, these tips are more of a byproduct of my work then a excess one. I hope they help!
+
+# License
+
+Everything in this repository is [licensed under MIT](./LICENSE.txt). Feel free to do whatever you want with it, but I am not liable for SEGFAULTs or SIGPIPEs.
