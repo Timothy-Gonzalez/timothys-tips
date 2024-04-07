@@ -37,6 +37,7 @@ jobs:
           - cs341/mp-malloc
           - cs341/mp-password-cracker
           - cs341/mp-parallel-make
+          - cs341/mp-finding-filesystems
 
     steps:
       - uses: actions/checkout@v4

@@ -1,0 +1,43 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "make all",
+      "type": "shell",
+      "command": "make all",
+      "group": {
+        "kind": "build"
+      }
+    },
+    {
+      "label": "make debug",
+      "type": "shell",
+      "command": "make debug",
+      "group": {
+        "kind": "build"
+      }
+    },
+    {
+      "label": "make clean",
+      "type": "shell",
+      "command": "make clean",
+      "group": {
+        "kind": "none"
+      }
+    },
+    {
+      "label": "run",
+      "type": "shell",
+      "command": "./minixfs_test-debug",
+      "args": [],
+      "dependsOn": "make debug",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ]
+}
