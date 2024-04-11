@@ -86,7 +86,7 @@ curl -sSL https://github.com/Timothy-Gonzalez/timothys-tips/releases/latest/down
   - For the `DELETE` request, you don't need to send binary data - what do you need to send? (Look at the [MP page](https://cs341.cs.illinois.edu/assignments/networking_mp.html)!!)
   - For the `DELETE` response, you don't need to handle any binary data - just call the right format function if it succeeds
   - If you **haven't implemented error handling** - now is a perfect time. Trying to `DELETE` a file that doesn't exist gives an error.
-- And finally, you have `GET` and `PULL`
+- And finally, you have `GET` and `PUT`
   - These two methods are opposites, but have a lot in similar.
   - For the `GET` **request**, you need to specify which file.
   - For the `GET` **response**, you need to read the size & write to a file.
