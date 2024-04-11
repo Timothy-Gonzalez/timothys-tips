@@ -1,0 +1,42 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "cppdbg",
+      "request": "launch",
+      "name": "gdb debug client",
+      "program": "${workspaceRoot}/client-debug",
+      "args": ["127.0.0.1:3000", "LIST"],
+      "cwd": "${workspaceRoot}",
+      "preLaunchTask": "make debug",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        },
+        { "text": "-gdb-set follow-fork-mode parent" }
+      ]
+    },
+    {
+      "type": "cppdbg",
+      "request": "launch",
+      "name": "gdb debug server",
+      "program": "${workspaceRoot}/server-debug",
+      "args": ["3000"],
+      "cwd": "${workspaceRoot}",
+      "preLaunchTask": "make debug",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        },
+        { "text": "-gdb-set follow-fork-mode parent" }
+      ]
+    }
+  ]
+}

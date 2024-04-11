@@ -38,6 +38,7 @@ jobs:
           - cs341/mp-password-cracker
           - cs341/mp-parallel-make
           - cs341/mp-finding-filesystems
+          - cs341/mp-nonstop-networking
 
     steps:
       - uses: actions/checkout@v4

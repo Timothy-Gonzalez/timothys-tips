@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "*.hhp": "cpp",
+        "stdbool.h": "c"
+    }
+}
