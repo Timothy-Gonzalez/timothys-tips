@@ -39,6 +39,7 @@ curl -sSL https://github.com/Timothy-Gonzalez/timothys-tips/releases/latest/down
   - What is an "error" and how do you handle it?
   - Do you know how to traverse through the results of `getaddrinfo`, make a socket, and connect to it?
   - How do you handle `EINTR`? When do you have to handle it?
+  - When should you `shutdown`? It's not just once at the end!
   - **If you can't answer the above, go find the answer!** You **_should_ know these** from the three links above!
 - **Part 1 is not that difficult,** _but_ you can **make** it difficult if you ignore the numerous resources above.
   Also, if you somehow haven't used a debugger yet, this is the mp to learn (it takes 10 minutes, and saves hundreds). **Good luck!**
@@ -63,6 +64,8 @@ curl -sSL https://github.com/Timothy-Gonzalez/timothys-tips/releases/latest/down
       4. Cleanup
   - For the `LIST` request, you don't need to send and binary data - you just need to send the `LIST` verb and a newline.
     See the [MP page](https://cs341.cs.illinois.edu/assignments/networking_mp.html) for specific examples.
+    - Make sure you tell the server you are done making your request! You should send a EOF using `shutdown`.
+      **You do not call shutdown only once at the end**! Check the [MP page](https://cs341.cs.illinois.edu/assignments/networking_mp.html)!
   - For responses, you need to first check if the request was a success (`OK`), or had an error (`ERROR`).
     - **Note: You MUST handle invalid headers**. This means if the header does not begin with `OK\n` or `ERROR\n`,
       you should stop processing the response and use the relevant format function.
