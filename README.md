@@ -7,7 +7,7 @@
 
 # Topics
 
-[![CS341](https://img.shields.io/badge/CS341-yellow?style=for-the-badge)](./cs341/)
+[![CS341](https://img.shields.io/badge/CS341-yellow?style=for-the-badge)](./cs341/README.md)
 
 </div>
 
