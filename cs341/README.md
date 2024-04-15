@@ -4,6 +4,8 @@
 
 A collection of tips & tests for [UIUC's Systems Programming course](https://cs341.cs.illinois.edu/)
 
+[![All Tips](https://img.shields.io/badge/Tips-All-green?style=for-the-badge)](../README.md)
+
 # MPs
 
 [![Shell](https://img.shields.io/badge/Shell-yellow?style=for-the-badge)](./mp-shell/README.md)

@@ -2,6 +2,8 @@
 
 # MP Shell
 
+[![All Tips](https://img.shields.io/badge/Tips-All-green?style=for-the-badge)](../../README.md)
+[![CS 341 Tips](https://img.shields.io/badge/Tips-CS_341-yellow?style=for-the-badge)](../README.md)
 [![Assignment Page](https://img.shields.io/badge/Assignment-shell-yellow?style=for-the-badge)](https://cs341.cs.illinois.edu/assignments/shell.html)
 
 </div>

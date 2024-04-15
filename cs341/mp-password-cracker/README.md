@@ -2,6 +2,8 @@
 
 # MP Password Cracker
 
+[![All Tips](https://img.shields.io/badge/Tips-All-green?style=for-the-badge)](../../README.md)
+[![CS 341 Tips](https://img.shields.io/badge/Tips-CS_341-yellow?style=for-the-badge)](../README.md)
 [![Assignment Page](https://img.shields.io/badge/Assignment-Password_Cracker-seagreen?style=for-the-badge)](https://cs341.cs.illinois.edu/assignments/password_cracker.html)
 
 </div>
