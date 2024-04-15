@@ -8,9 +8,9 @@
 
 </div>
 
-# Visual debugger & tasks setup
+# Installation
 
-To add the visual debugger & tasks, download and extract the tar from the [latest release](https://github.com/Timothy-Gonzalez/timothys-tips/releases/latest):
+To install, download and extract the tar from the [latest release](https://github.com/Timothy-Gonzalez/timothys-tips/releases/latest):
 
 ```sh
 curl -sSL https://github.com/Timothy-Gonzalez/timothys-tips/releases/latest/download/cs341-mp-password-cracker.tar | tar -xv
