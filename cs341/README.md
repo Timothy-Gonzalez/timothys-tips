@@ -2,7 +2,7 @@
 
 # CS 341 - Systems Programming
 
-Here's a collection of tips & tests for UIUC's Systems Programming course.
+A collection of tips & tests for [UIUC's Systems Programming course](https://cs341.cs.illinois.edu/)
 
 # MPs
 
