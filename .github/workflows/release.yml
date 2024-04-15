@@ -49,6 +49,7 @@ jobs:
         id: build
         shell: bash
         run: |
+          python build/convert_urls.py
           converted_path=$(echo "${{ matrix.path }}" | sed 's/\//-/g')
           echo "file_name=$converted_path" >> $GITHUB_OUTPUT
           mkdir staging
