@@ -100,6 +100,138 @@ curl -sSL https://github.com/Timothy-Gonzalez/timothys-tips/releases/latest/down
   - Make sure you're reading & writing properly, and **send the size before** you send any binary data.
     **Make sure you read the size** before you read any binary data.
 
-And that's all... for now. Check back next week for part 2!
+# Part 2 Tips
+
+- Prepare yourself. Part 2 is significantly more involved than part 1, but doable.
+  I don't like to say "hard" or "easy" because those are very relative terms, so I'll say part 2 is very implementation heavy,
+  like shell, where there's a lot of tiny details you have to get right,
+  but like malloc, where it can be difficult to debug what is wrong.
+- You only need 50% for Part 2. Part 3 will require everything to work. These tips will cover the 100% for Part 2.
+  Part 3 will cover the Part 3 specific stress tests.
+- If you got by Part 1 by skimming the [MP page](https://cs341.cs.illinois.edu/assignments/networking_mp.html),
+  stop, and actually re-read it.
+  You will have a bad time with Part 2 if you don't understand what you are doing.
+  Additionally, you should read the [coursebook resource on non-blocking IO](https://cs341.cs.illinois.edu/coursebook/Networking#non-blocking-io).
+  - **You should be able to answer the following questions**. If you can't, you will have a bad time.
+  - What is epoll? Why do we need it?
+  - What is the difference between level triggered and edge triggered? What are the advantages to each?
+  - How do we know if read/write will block?
+- First things first, you **need to plan this MP out**. I would strongly recommend diagramming a state machine.
+  - **Why?**
+  - Unlike with the client, it's not as simple as just read-everything and write-everything.
+    One of your read/writes might be interrupted, and you'll have to come back to it later.
+  - For example, say you have a 2048 byte file. You write 924 bytes of it, and then write blocks.
+    Since our server is single-threaded and we are using non-blocking io, we can't just wait for it to stop blocking.
+    That's epoll's job. In the mean time, we have to move on the next connection and come back later.
+  - As such, **each connection must maintain a state of some sort**.
+  - Some methods share some functionality, so you want your state machine to share some states with different methods.
+    Think of states as functions.
+    **Each connection will need to maintain metadata** about it's state, and probably other things depending on your implementation.
+    Think about what metadata you need to store.
+  - Some ideas to get you started:
+    - All requests require reading the header (could be a start state)
+    - Only `PUT` requires reading the request's binary data
+    - All requests (even ones that error!) require responding with a header
+    - Only `GET` and `LIST` require responding with binary data
+    - All requests must be closed (could be an end state)
+  - For reference, here's my state diagram. **Yours could be different**, but it will likely be similar.
+    - ![server_state_diagram](./server_state_diagram.png)
+    - Each state corresponds to a color. The verbs are in purple, while any bad states (errors and disconnects) are red.
+    - Disconnect just means when we can no longer read/write or the client disconnects -
+      for example SIGPIPE (which you should catch) will cause later read/writes to error instead.
+    - If you want to make your own, this was made with [draw.io](https://draw.io)
+- After you've planned things out, I'd recommend first getting the base boilerplate code down.
+  This is parsing arguments, creating the temp directory, starting the server, setting up epoll, and finally cleaning everything up.
+  - **Make everything modular!** The key to this MP is good organization and splitting up logic into functions.
+    **If a function has more than one main purpose, it should be two functions.**
+  - For creating the temp directory, read the
+    [MP page](https://cs341.cs.illinois.edu/assignments/networking_mp.html) for the exact way you should do it.
+    **If you fail to create & print out the temp directory properly, you will fail all tests**.
+  - Creating the server is almost the exact same logic as the [Charming Chatroom](https://cs341.cs.illinois.edu/assignments/charming_chatroom.html) lab,
+    **but make sure you make it non-blocking**. When working with epoll, everything should be non-blocking.
+    Make sure you apply the non-blocking flag to the socket.
+    (For the specifics, see the man page, there are some cases where it's not _needed_, but most likely you need it)
+  - For this stage don't worry about any connections yet -
+    just try to take the [coursebook example](https://cs341.cs.illinois.edu/coursebook/Networking#non-blocking-io) on epoll,
+    and go from there. Note: this is taken from the man page for epoll, which is a good read after the coursebook.
+  - I recommend setting up `SIGINT` handling early - it's very simple and allows you to implement cleanup.
+    Your signal handler just needs to set a flag for your `epoll_wait` loop to know it's time to stop.
+    Remember, on a signal, sys calls like `epoll_wait` will error with `EINTR`. This allows you to exit your `epoll_wait` loop.
+    Deleting the temp directories created is annoying, so implement the cleanup before anything else so you don't have to.
+- Now, it's time to get into the meat of this MP.
+- Once you have epoll setup, you should have some generic `handle_connection` method, that takes in an fd.
+  Each connection will need metadata to track it's state, along with other info that depends on your implementation.
+- **Make sure you set new connections to be non-blocking**. The man page references `setnonblocking`, but that's not a real function.
+  You might find `fcntl` helpful.
+- **Important note:** Each of the below cover a major part of parsing, and cover each method.
+  To start, I'd recommend implementing everything you need for ONE specific method, and then add the rest as you test it out.
+  **Test as you implement!** If you wait till the end, you'll have a huge amount of code to test.
+  If you test incrementally, you only need to worry about a few lines.
+- The first thing you'll need to do regardless of method is implement request header parsing.
+  - Remember, a valid header cannot have a filename longer that 512 character as per MP spec.
+    This means there is a maximum header size.
+  - A valid header must be terminated with a `\n`. If you do not find one in that maximum header, you have a problem.
+  - Note `err_bad_request` in [format.h](format.h). If you get a bad request, you should return an error header with that error message.
+  - `err_no_such_file` is for `GET`/`DELETE` requests that reference a file that doesn't exist.
+  - If you do states properly, error handling is as simple as setting an error field on the connection metadata,
+    and changing the state to go to the response header.
+  - Be very careful about reading too much. You don't want later binary data handling to be messed up!
+  - Make sure you handle blocking! The client might send part of the request, and then block before sending the rest!
+    - You may need to modify your `read_retry` and `write_retry` from the client code to handle blocking!
+    - `errno` will be set to specific values on a block! Read the coursebook and man pages!
+  - If you don't handle blocking, you will busy-wait, which means you won't be supporting multiple clients!
+- Next, you should implement response header sending. Note, for `PUT` you'll need to handle request data first,
+  but I'm skipping that for now as you want to get something basic working first!
+  You can always lie and say the request succeeded, which makes testing the basic functionality easier!
+  - Response headers are pretty simple - depending on what happened earlier, you're either sending `OK\n` or`ERROR\n<err msg>\n`.
+  - Keep in mind what you'll do if any of this blocks - blocking can happen at any time for a load of reasons.
+- Now that you've tested the basic behavior and verified it works, it's time to handle binary data.
+  You need to implement `PUT` first, as testing `LIST` and `GET` without files on the server is hard.
+  This means reading the request data.
+  - When reading the request header, if the method is put, the next state should be reading the request data.
+  - You should read the size first, then the data.
+  - **You cannot load the entire request data into memory**.
+    Firstly, some files are larger than memory. Secondly, **larger files will almost always block**.
+    Networks are slower than local io, and the socket can get backed up.
+  - As such, you'll need to read a bit of the request data, save it to disk,
+    and then come back later when there's more to read (with the magic of `epoll`).
+  - **Note you need to handle the client sending too much or too little data**.
+    This is similar to the logic you did with the client, but across multiple reads after multiple blocks.
+    - The `err_bad_file_size` [format.h](format.h) error should be sent in this case.
+    - **The file should also be deleted in a failed `PUT` request!**
+  - After you implement this, you can test `PUT` and `DELETE`!
+    Try uploading large files and diffing the uploaded content with the original. [test_files](./test_files/) may be helpful.
+    You'll also want to test MUCH larger files eventually, for the very large test. I'll explain this later.
+- Finally, you need to handle sending binary data - the response data.
+  - The logic for this is essentially request data, but reversed.
+  - First things first, you need to calculate the size of your response data.
+    - For `GET`, this is easy - `fstat`.
+    - For `LIST`, this is 0 if there are no files, or `sum(file_name_lengths) + num_files - 1` if there are.
+      **Note that newlines are sent for every file line except the last**.
+  - For `GET`, you are just reading in the file and sending it. Be careful with keeping your read and what you send in sync.
+    If you read in 1024 bytes of a file, you can't just send 956 and then read in another 1024 bytes of a file, or you'll miss data.
+  - For `LIST`, it's a little more tricky. Because of the max filename requirement, I'd recommend sending one file at a time.
+    - You'll have to keep track of how many filenames you've sent so far (metadata)
+- So, now you're done? Not quite yet. **You need to test!!** There are a couple things you should test:
+  - All methods should work!
+  - `SIGPIPE` shouldn't kill your server.
+  - If a read/write errors, close the connection. Do not send an error, as you can't.
+  - Make sure your error responses work. Bad requests should error, `DELETE`ing a invalid file should error.
+  - You should clean up the temp directory when the server is `SIGINT`'d! My provided tests assume you do as an incentive!
+  - Test too much / too little data.
+    The easiest way to do this is modify your client to say that size is +1 or -1 that the actual size.
+  - You should test `PUT`/`GET` with extremely large files. One of the tests tests `4096 MB` (much larger than memory).
+    - Note **this may mean modifying your client if it currently reads the entire file into memory** before writing it.
+    - I have provided [tests](./tests/) for this.
+    - [tests/many_puts_gets.sh](./tests/many_puts_gets.sh) will test random files from `2` bytes to `2^32` bytes.
+      This is a good stress test to see if your server and client can handle large files.
+      Note that logging is disabled, so you'll want to use the below script for actually testing a specific size.
+    - [tests/single_puts_gets.sh](./tests/single_puts_gets.sh) is a single-size version of the many one.
+      It lets you test a specific size file, and logs everything.
+- After you've thoroughly tested everything at least three times, submit to the autograder and pray.
+  If you test well, you should catch most errors, but this is a large MP and it's easy to miss a small detail.
+  Debugging is your biggest enemy and friend!
+
+And that's all... for now. Check back next week for part 3!
 
 c:
