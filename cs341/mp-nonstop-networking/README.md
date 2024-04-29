@@ -26,6 +26,16 @@ curl -sSL https://github.com/Timothy-Gonzalez/timothys-tips/releases/latest/down
    - [test_files/harrypotter.txt](test_files/harrypotter.txt) is a medium sized text file - the entire first book of Harry Potter
    - [test_files/tacos.mp4](test_files/tacos.mp4) is a large video file - this should be your "everything works properly" stress test
    - I recommend starting with the smallest, and once that works work your way up the list
+5. Last but not least, **several test scripts are provided**
+   - [tests](tests) is where you can find the tests. See inside each file for specifics, this is just the overview.
+   - I'll mention which tests are useful where in the tips, also.
+   - [tests/put_get.sh](tests/put_get.sh) makes a single put, then get, and validates whether both worked. The size can be specified.
+   - [tests/multi_put_get.sh](tests/multi_put_get.sh) makes, you guessed it, multiple puts and then gets!
+     This is essentially equivalent to running `put_get.sh` for sizes from 2 bytes to 2 gigabytes.
+   - [tests/very_many_put.sh](tests/very_many_put.sh) makes multiple puts, but at the same time.
+     The number of clients and size of requests can be specified. This is good for the AG's `Very Many Client Put Test`.
+   - [tests/stress_test.sh](tests/stress_test.sh) does puts, lists, gets, and deletes.
+     The number of clients and size of requests can be specified. This is good for the AG's `Stress Test`.
 
 # Part 1 Tips
 
@@ -222,16 +232,61 @@ curl -sSL https://github.com/Timothy-Gonzalez/timothys-tips/releases/latest/down
     The easiest way to do this is modify your client to say that size is +1 or -1 that the actual size.
   - You should test `PUT`/`GET` with extremely large files. One of the tests tests `4096 MB` (much larger than memory).
     - Note **this may mean modifying your client if it currently reads the entire file into memory** before writing it.
-    - I have provided [tests](./tests/) for this.
-    - [tests/many_puts_gets.sh](./tests/many_puts_gets.sh) will test random files from `2` bytes to `2^32` bytes.
-      This is a good stress test to see if your server and client can handle large files.
-      Note that logging is disabled, so you'll want to use the below script for actually testing a specific size.
-    - [tests/single_puts_gets.sh](./tests/single_puts_gets.sh) is a single-size version of the many one.
-      It lets you test a specific size file, and logs everything.
+    - I have provided [tests](./tests/) for this. **See [Installation](#installation) to download them.**
+    - To test your put and get, I'd recommend first running:
+    - [tests/multi_put_get.sh](./tests/multi_put_get.sh), which will do PUTs and GETs from `2` bytes to `2G`.
+      This is a good stress test to see if your server and client can handle large files,
+      and will let you know what to test with the next test.
+    - [tests/put_get.sh](./tests/put_get.sh) is a single-size version of the many one.
+      It lets you test a specific sized PUT-GET.
 - After you've thoroughly tested everything at least three times, submit to the autograder and pray.
   If you test well, you should catch most errors, but this is a large MP and it's easy to miss a small detail.
   Debugging is your biggest enemy and friend!
 
-And that's all... for now. Check back next week for part 3!
+# Part 3 Tips
+
+- At this point, if you did part 2 perfectly, you're done!
+- However, that's *very* optimistic. This section will discuss the two tests specific to part 3,
+  so if you haven't completed the entirety of part 2, **do that first!**.
+- Part 3 is essentially the concurrency test. While part 2 had a basic concurrency test,
+  part 3 will verify you can actually handle multiple clients at the same time.
+- `Very Many Client Put Test` - this is the first of the two new tests you have to pass, and should be your first focus.
+  - This test simply makes multiple simultaneous requests to PUT files at the same time.
+  - Some things to note:
+    - **These files do not have to be the same file**. That behavior is not deterministic, and so it is not tested.
+      - This means that they test `PUT file1`, `PUT file2`, `PUT file3`, etc. at the same time
+    - **Make sure you don't have excessive logging!** While outputting to stderr doesn't affect the autograder,
+      it can affect how much time your code takes to execute, since using IO can take significant time!
+      - Some common mistakes here are outputting every time you block, every time you call epoll_wait, etc.
+      - **The easiest solution** is changing the `LOG` macro to evaluate to nothing when you submit to the AG,
+        so you don't have to worry about it!
+    - **This test can be non-deterministic** if your code is not perfect.
+      This is because blocking is very dependent on many factors, and won't be consistent every time.
+    - **See whether you are timing out, returning wrong, or if it failed to send SIGINT**. These all mean *different* things!
+      - Failed to send SIGINT means your server crashed or stopped earlier than expected
+      - Wrong data means you didn't respond correctly
+      - Timeout means your code took too long
+  - I've made a test script specifically for this test: [tests/very_many_put.sh](tests/very_many_put.sh).
+    - See [Installation](#installation) to download it
+    - This test will make `n` clients make puts of size `s`.
+    - Your goal is to play with `n` and `s` until it stops working, then try to debug! The smaller, the easier!
+  - This can be very hard to debug, as by nature, a lot happens at once.
+    Adding good logging and using the debugger smartly is very important!
+    - You **cannot step through your code line by line**, as the file sizes you need to test with are huge.
+    - Therefore, you want to make smart breakpoints in places where your code might break, like when a block occurs.
+- `Stress Test` - this is the final new test. Do the test above first, always.
+  - This is the hardest test to pass. If you can't get it, it's not the end of the world.
+  - The notes from the previous test also apply here - this test relies on speed & blocking.
+  - This test's client count is in the double-digits. You don't need to go crazy testing.
+  - I've made a test script for this test: [tests/stress_test.sh](tests/stress_test.sh).
+    - See [Installation](#installation) to download it
+    - This test will make `n` clients make PUTs, LISTs, GETs, DELETEs of size `s`.
+    - Your goal, as always, is to make your server break!
+  - As with the previous test, this can be extremely annoying and difficult to debug.
+    Use the strategies mentioned previously to make debugging easier.
+- As always, test, test, test, and test again!
+  The key to making a good program is making sure it works in every way possible. Good luck!
+
+Congrats you've made it through Systems Programming! Here's a cake: 🎂
 
 c:
