@@ -87,6 +87,7 @@ echo -e "${GREEN}${BOLD}Found server dir: $SERVER_DIR ${RESET}"
 
 # Create files
 mkdir $INPUT_DIR $OUTPUT_DIR -p
+echo -e "${BOLD}Creating $clients files of size $size_readable...${RESET}"
 create_files $clients $INPUT_DIR/ $size $mode
 
 if [ $? -ne 0 ]; then
