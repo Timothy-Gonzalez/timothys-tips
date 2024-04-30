@@ -9,6 +9,7 @@
 # You should use large file sizes (> 256 M) to ensure blocking occurs.
 
 INPUT_DIR=very_many_put_input
+REMOTE_PREFIX=very_many_put_
 
 # Load shared functions
 source tests/functions.sh
@@ -92,13 +93,13 @@ if [ $? -ne 0 ]; then
 fi
 
 # Run tests
-run_and_wait $SERVER_DIR PUT $clients $mode $INPUT_DIR
+run_and_wait $SERVER_DIR PUT $clients $mode $INPUT_DIR $REMOTE_PREFIX null
 
 if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Cleanup (you can remove this if you want to inspect further)
+# Cleanup (you can comment this out if you want to inspect further)
 rm $INPUT_DIR -r &> /dev/null
 
 # All clients finished successfully

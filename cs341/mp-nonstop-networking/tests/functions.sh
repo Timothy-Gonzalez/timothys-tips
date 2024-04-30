@@ -256,7 +256,7 @@ run_method() {
 }
 
 # Runs a specified method for all clients
-# run_and_wait [temp_server_dir] [method] [clients] [mode] [input_dir] [output_dir]
+# run_and_wait [temp_server_dir] [method] [clients] [mode] [input_dir] [remote_prefix] [output_dir]
 # Returns 0 on success, 1 on fail
 run_and_wait() {
     local temp_server_dir=$1
@@ -264,11 +264,12 @@ run_and_wait() {
     local clients=$3
     local mode=$4
     local input_dir=$5
-    local output_dir=$6
+    local remote_prefix=$6
+    local output_dir=$7
 
     echo -e "${BOLD}Running $clients clients for $method...${RESET}"
     for ((i = 1; i <= clients; i++)); do
-        run_method $method $temp_server_dir $mode $input_dir/$i random$i $output_dir/random$i &
+        run_method $method $temp_server_dir $mode $input_dir/$i ${remote_prefix}${i} $output_dir/$i &
         pids[$i]=$!
     done
 

@@ -10,6 +10,7 @@
 # Note that the vm only has so much space - so you can't just test 1024 clients with 500M
 
 INPUT_DIR=stress_test_input
+REMOTE_PREFIX=stess_test_
 OUTPUT_DIR=stress_test_output
 
 # Load shared functions
@@ -94,7 +95,7 @@ fi
 
 # Run tests
 runwm() {
-	run_and_wait $SERVER_DIR $1 $clients $mode $INPUT_DIR $OUTPUT_DIR
+	run_and_wait $SERVER_DIR $1 $clients $mode $INPUT_DIR $REMOTE_PREFIX $OUTPUT_DIR
 }
 
 ## Tests
@@ -123,7 +124,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Cleanup (you can remove this if you want to inspect further)
+# Cleanup (you can comment this out if you want to inspect further)
 rm $INPUT_DIR $OUTPUT_DIR -r &> /dev/null
 
 # All clients finished successfully

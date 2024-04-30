@@ -55,5 +55,5 @@ done
 
 echo -e "${GREEN}${BOLD}All tests passed successfully.${RESET}"
 
-# Cleanup (you can remove this if you want to inspect further)
+# Cleanup (you can comment this out if you want to inspect further)
 rm $INPUT_FILE $OUTPUT_FILE &> /dev/null
