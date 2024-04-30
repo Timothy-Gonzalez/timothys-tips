@@ -7,7 +7,8 @@ RED='\033[0;31m'
 BOLD='\033[1m'
 RESET='\033[0m'
 
-SERVER="localhost:3000"
+SERVER_PORT="3000"
+SERVER="localhost:${SERVER_PORT}"
 
 # Converts units like 1GB into their byte value
 convert_to_bytes() {
@@ -38,6 +39,15 @@ convert_to_bytes() {
 # Find the server dir by PUTing a test file to the server, and then searching for it
 # Returns 0 and echos dirname on success, returns 1 and echos errors on fail
 find_server_dir() {
+    # Check for listening server
+    ss -nltp | grep ":$SERVER_PORT" &> /dev/null
+
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}${BOLD}No server listening on port $SERVER_PORT, did you start your server first?"
+        echo -e "${RED}Try: ./server $SERVER_PORT"
+        return 1
+    fi
+
     # Put the test file
     put_out=$(./client-reference $SERVER PUT the_key test_files/hello.txt)
     if [ $? -ne 0 ]; then
