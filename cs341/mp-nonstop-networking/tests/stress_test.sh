@@ -86,15 +86,11 @@ echo -e "${GREEN}${BOLD}Found server dir: $SERVER_DIR ${RESET}"
 
 # Create files
 mkdir $INPUT_DIR $OUTPUT_DIR -p
+create_files $clients $INPUT_DIR/ $size $mode
 
-echo -e "${BOLD}Creating $clients files of size $size_readable...${RESET}"
-for ((i = 1; i <= clients; i++)); do
-    dd if=/dev/random of=$INPUT_DIR/random$i bs=$size count=1 &>/dev/null &
-    if (( $i % 8 == 0)); then
-        wait
-    fi
-done
-wait
+if [ $? -ne 0 ]; then
+    exit 1
+fi
 
 # Run tests
 runwm() {
@@ -102,10 +98,30 @@ runwm() {
 }
 
 ## Tests
+
+### PUT
 runwm PUT
+if [ $? -ne 0 ]; then
+    exit 1
+fi
+
+### LIST
 runwm LIST
+if [ $? -ne 0 ]; then
+    exit 1
+fi
+
+### GET
 runwm GET
+if [ $? -ne 0 ]; then
+    exit 1
+fi
+
+### DELETE
 runwm DELETE
+if [ $? -ne 0 ]; then
+    exit 1
+fi
 
 # Cleanup (you can remove this if you want to inspect further)
 rm $INPUT_DIR $OUTPUT_DIR -r &> /dev/null

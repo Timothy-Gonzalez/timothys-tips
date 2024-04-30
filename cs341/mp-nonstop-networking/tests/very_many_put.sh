@@ -85,16 +85,18 @@ echo -e "${GREEN}${BOLD}Found server dir: $SERVER_DIR ${RESET}"
 mkdir $INPUT_DIR -p
 
 echo -e "${BOLD}Creating $clients files of size $size_readable...${RESET}"
-for ((i = 1; i <= clients; i++)); do
-    dd if=/dev/random of=$INPUT_DIR/random$i bs=$size count=1 &>/dev/null &
-    if (( $i % 8 == 0)); then
-        wait
-    fi
-done
-wait
+create_files $clients $INPUT_DIR/ $size $mode
+
+if [ $? -ne 0 ]; then
+    exit 1
+fi
 
 # Run tests
 run_and_wait $SERVER_DIR PUT $clients $mode $INPUT_DIR
+
+if [ $? -ne 0 ]; then
+    exit 1
+fi
 
 # Cleanup (you can remove this if you want to inspect further)
 rm $INPUT_DIR -r &> /dev/null

@@ -60,6 +60,59 @@ find_server_dir() {
     return 0
 }
 
+# Creates a file of a certain size
+# create_file [output] [size] [mode]
+# Returns 0 on success, 1 on fail
+create_file() {
+    local output=$1
+    local size=$2
+    local mode=$3
+
+    # dd outputs success output and error output to stderr,
+    # when not verbose, we want to only output error output
+    local dd_out
+    if [ $mode = "v" ]; then
+        dd_out=$(dd if=/dev/random of=$output bs=$size count=1)
+    else
+        dd_out=$(dd if=/dev/random of=$output bs=$size count=1 2>&1)
+    fi
+
+    if [ $? = 0 ]; then
+        return 0
+    else
+        echo $dd_out
+        return 1
+    fi
+}
+
+# Creates n files of a certain size
+# create_files [n] [output_prefix] [size] [mode]
+# output_prefix is the prefix, like ./output/file will become ./output/file1, ./output/file2, etc.
+# mode can be v for verbose or n for normal
+# Returns 0 on success, 1 on fail
+create_files() {
+    local n=$1
+    local output_prefix=$2
+    local size=$3
+
+    for ((i = 1; i <= clients; i++)); do
+        create_file ${output_prefix}${i} $size $mode &
+        pids[$i]=$!
+    done
+
+    for ((i = 1; i <= clients; i++)); do
+        pid=${pids[$i]}
+        wait "$pid"
+        status=$?
+        if [ $status -ne 0 ]; then
+            echo -e "${RED}${BOLD}Error: Failed to create file $i with $status status.${RESET}"
+            return 1
+        fi
+    done
+
+    return 0
+}
+
 # Runs a PUT, and validates
 # run_put [server_temp_dir] [mode] [local] [remote]
 # mode can be v for verbose or n for normal
@@ -215,7 +268,7 @@ run_and_wait() {
 
     echo -e "${BOLD}Running $clients clients for $method...${RESET}"
     for ((i = 1; i <= clients; i++)); do
-        run_method $method $temp_server_dir $mode $input_dir/random$i random$i $output_dir/random$i &
+        run_method $method $temp_server_dir $mode $input_dir/$i random$i $output_dir/random$i &
         pids[$i]=$!
     done
 

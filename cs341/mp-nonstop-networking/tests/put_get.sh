@@ -17,6 +17,10 @@ USAGE="${RED}${BOLD}Usage: $0 [size]\n\
 ${RESET}${RED}For example: $0 1G\n\
 This is a simple script that attempts a PUT, and then GET, of the size requested.${RESET}"
 
+INPUT_FILE="put_get_in"
+REMOTE_FILE="put_get"
+OUTPUT_FILE="put_get_out"
+
 # Parse args
 
 ## Check size is actually provided
@@ -41,17 +45,17 @@ echo -e "${GREEN}${BOLD}Found server dir: $SERVER_DIR ${RESET}"
 
 # PUT/GET test
 echo -e "${BOLD}Creating file of size $size_readable${RESET}"
-dd if=/dev/random of=random-in bs=$size count=1
+create_file $INPUT_FILE $size v
 
 if [ $? -ne 0 ]; then
     exit 1
 fi
 
-run_put_get $SERVER_DIR v random-in random random-out
+run_put_get $SERVER_DIR v $INPUT_FILE $REMOTE_FILE $OUTPUT_FILE
 status=$?
 
-# Cleanup (you can remove this if you want to inspect further)
-rm random-in random-out &> /dev/null
+# Cleanup (you can comment this out if you want to inspect further)
+rm $INPUT_FILE $OUTPUT_FILE &> /dev/null
 
 # Exit
 exit $status
