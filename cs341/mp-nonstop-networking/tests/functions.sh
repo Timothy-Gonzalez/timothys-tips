@@ -10,6 +10,11 @@ RESET='\033[0m'
 SERVER_PORT="3000"
 SERVER="localhost:${SERVER_PORT}"
 
+# Echos to stderr
+echoerr() {
+    echo $@ >&2
+}
+
 # Converts units like 1GB into their byte value
 convert_to_bytes() {
     local input="$1"
@@ -37,22 +42,22 @@ convert_to_bytes() {
 }
 
 # Find the server dir by PUTing a test file to the server, and then searching for it
-# Returns 0 and echos dirname on success, returns 1 and echos errors on fail
+# Returns 0 and echos dirname on success, returns 1 on fail
 find_server_dir() {
     # Check for listening server
     ss -nltp | grep ":$SERVER_PORT" &> /dev/null
 
     if [ $? -ne 0 ]; then
-        echo -e "${RED}${BOLD}No server listening on port $SERVER_PORT, did you start your server first?"
-        echo -e "${RED}Try: ./server $SERVER_PORT"
+        echoerr -e "${RED}${BOLD}No server listening on port $SERVER_PORT, did you start your server first?"
+        echoerr -e "${RED}Try: ./server $SERVER_PORT"
         return 1
     fi
 
     # Put the test file
     put_out=$(./client-reference $SERVER PUT the_key test_files/hello.txt)
     if [ $? -ne 0 ]; then
-        echo $put_out
-        echo -e "${RED}${BOLD}Could not PUT test file to server on $SERVER ${RESET}"
+        echoerr $put_out
+        echoerr -e "${RED}${BOLD}Could not PUT test file to server on $SERVER ${RESET}"
         return 1
     fi
 
@@ -60,7 +65,7 @@ find_server_dir() {
     local found=$(find . -name "the_key" -printf "%T@ %p\n" | sort -nr | head -n 1 | cut -f2 -d' ')
 
     if [ $? -ne 0 ]; then
-        echo -e "${RED}${BOLD}Could not find created file (make sure your server PUT works!) ${RESET}"
+        echoerr -e "${RED}${BOLD}Could not find created file (make sure your server PUT works!) ${RESET}"
         return 1
     fi
 
@@ -90,7 +95,7 @@ create_file() {
     if [ $? = 0 ]; then
         return 0
     else
-        echo $dd_out
+        echoerr $dd_out
         return 1
     fi
 }
@@ -115,7 +120,7 @@ create_files() {
         wait "$pid"
         status=$?
         if [ $status -ne 0 ]; then
-            echo -e "${RED}${BOLD}Error: Failed to create file $i with $status status.${RESET}"
+            echoerr -e "${RED}${BOLD}Error: Failed to create file $i with $status status.${RESET}"
             return 1
         fi
     done
@@ -160,9 +165,6 @@ run_list() {
     else
         result=$(./client-debug $SERVER LIST 2>/dev/null | sort)
     fi
-
-    echo $expected_result > expected
-    echo $result > result
     
     # Compare
     if [[ "$result" == "$expected_result" ]]; then
@@ -231,11 +233,11 @@ run_put_get() {
             echo -e "${GREEN}${BOLD}PUT & GET Success${RESET}"
             return 0
         else
-            echo -e "${RED}${BOLD}GET Failure${RESET}"
+            echoerr -e "${RED}${BOLD}GET Failure${RESET}"
             return 1
         fi
     else
-        echo -e "${RED}${BOLD}PUT failure${RESET}"
+        echoerr -e "${RED}${BOLD}PUT failure${RESET}"
         return 2
     fi
 }
@@ -289,7 +291,7 @@ run_and_wait() {
         wait "$pid"
         status=$?
         if [ $status -ne 0 ]; then
-            echo -e "${RED}${BOLD}Error: Client $i failed to $method with $status status.${RESET}"
+            echoerr -e "${RED}${BOLD}Error: Client $i failed to $method with $status status.${RESET}"
             return 1
         fi
     done

@@ -37,7 +37,6 @@ echo -e "${BOLD}Attempting to find server...${RESET}"
 SERVER_DIR=$(find_server_dir)
 
 if [ $? -ne 0 ]; then
-    echo -e $SERVER_DIR
     exit 1
 fi
 
