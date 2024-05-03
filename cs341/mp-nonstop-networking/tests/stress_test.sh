@@ -100,6 +100,8 @@ runwm() {
 
 ## Tests
 
+start_time=$(get_current_time)
+
 ### PUT
 runwm PUT
 if [ $? -ne 0 ]; then
@@ -128,5 +130,7 @@ fi
 rm $INPUT_DIR $OUTPUT_DIR -r &> /dev/null
 
 # All clients finished successfully
-echo -e "${GREEN}${BOLD}All clients finished successfully.${RESET}"
+elapsed=$(get_formatted_elapsed_time $start_time)
+echo
+echo -e "${GREEN}${BOLD}All clients finished successfully in $elapsed.${RESET}"
 exit 0

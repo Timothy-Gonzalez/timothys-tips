@@ -15,6 +15,18 @@ echoerr() {
     echo $@ >&2
 }
 
+# Gets the current time, as a float
+get_current_time() {
+    date +%s.%N
+}
+
+# Gets the formatted elapsed time since a time, for example 1.23s
+get_formatted_elapsed_time() {
+    local start=$1
+    local now=$(get_current_time)
+    printf %.2fs $(echo "$now - $start" | bc -l)
+}
+
 # Converts units like 1GB into their byte value
 convert_to_bytes() {
     local input="$1"
@@ -224,16 +236,19 @@ run_put_get() {
     local server_temp_dir mode input remote output
     server_temp_dir=$1 mode=$2 input=$3 remote=$4 output=$5
 
+    local start_time=$(get_current_time)
+
     echo -e "${BOLD}Attempting PUT${RESET}"
     run_put $server_temp_dir $mode $input $remote
     if [ $? -eq 0 ]; then
         echo -e "${BOLD}Attempting GET${RESET}"
         run_get $server_temp_dir $mode $output $remote
         if [ $? -eq 0 ]; then
-            echo -e "${GREEN}${BOLD}PUT & GET Success${RESET}"
+            local elapsed=$(get_formatted_elapsed_time $start_time)
+            echo -e "${GREEN}${BOLD}PUT & GET success in $elapsed${RESET}"
             return 0
         else
-            echoerr -e "${RED}${BOLD}GET Failure${RESET}"
+            echoerr -e "${RED}${BOLD}PUT success, GET failure${RESET}"
             return 1
         fi
     else
@@ -279,6 +294,8 @@ run_and_wait() {
     local remote_prefix=$6
     local output_dir=$7
 
+    local start_time=$(get_current_time)
+
     echo -e "${BOLD}Running $clients clients for $method...${RESET}"
     for ((i = 1; i <= clients; i++)); do
         run_method $method $temp_server_dir $mode $input_dir/$i ${remote_prefix}${i} $output_dir/$i &
@@ -296,6 +313,7 @@ run_and_wait() {
         fi
     done
 
-    echo -e "${GREEN}${BOLD}All clients $method successfully.${RESET}"
+    elapsed=$(get_formatted_elapsed_time $start_time)
+    echo -e "${GREEN}${BOLD}All clients $method successfully in $elapsed.${RESET}"
     return 0
 }

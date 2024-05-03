@@ -102,5 +102,4 @@ fi
 rm $INPUT_DIR -r &> /dev/null
 
 # All clients finished successfully
-echo -e "${GREEN}${BOLD}All clients finished successfully.${RESET}"
 exit 0

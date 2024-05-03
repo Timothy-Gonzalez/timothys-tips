@@ -29,6 +29,7 @@ fi
 echo -e "${GREEN}${BOLD}Found server dir: $SERVER_DIR ${RESET}"
 
 # PUT/GET tests
+start_time=$(get_current_time)
 
 for size_str in $SIZES; do
     size=$(convert_to_bytes "$size_str")
@@ -52,7 +53,8 @@ for size_str in $SIZES; do
     fi
 done
 
-echo -e "${GREEN}${BOLD}All tests passed successfully.${RESET}"
+elapsed=$(get_formatted_elapsed_time $start_time)
+echo -e "${GREEN}${BOLD}All tests passed successfully in $elapsed.${RESET}"
 
 # Cleanup (you can comment this out if you want to inspect further)
 rm $INPUT_FILE $OUTPUT_FILE &> /dev/null
