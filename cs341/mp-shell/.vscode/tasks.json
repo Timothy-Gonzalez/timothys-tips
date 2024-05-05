@@ -22,7 +22,7 @@
     {
       "label": "C: make test",
       "type": "shell",
-      "command": "make test",
+      "command": "make -f TestMakefile test",
       "group": {
         "kind": "build"
       }
