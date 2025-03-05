@@ -1,6 +1,6 @@
 <div align = center>
 
-# MP Shell
+# MP WebSec
 
 [![All Tips](https://img.shields.io/badge/Tips-All-blue?style=for-the-badge)](../../README.md)
 [![CS 461 Tips](https://img.shields.io/badge/Tips-CS_461-0c0?style=for-the-badge)](../README.md)
