@@ -8,6 +8,7 @@ A collection of tips & tests for [UIUC's Computer Security I course](https://cou
 
 # MPs
 
+[![AppSec](https://img.shields.io/badge/AppSec-red?style=for-the-badge)](./mp-appsec/README.md)
 [![WebSec](https://img.shields.io/badge/WebSec-yellow?style=for-the-badge)](./mp-websec/README.md)
 
 # Note on Academic Integrity
