@@ -201,7 +201,7 @@ Similarly, **modularize your payload**. You can break it up into multiple functi
 - **Don't forget to implement spying** - you should fire a nav event when the user goes back/forward in history
 - The bonus for this MP is actually simple once you figure it out - about 5 lines
 
-## Conclusion
+# Conclusion
 
 You did it! Congratulations on surviving.
 

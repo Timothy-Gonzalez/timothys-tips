@@ -79,7 +79,7 @@ This first part ensures you know the python basics - do not skip this! If you st
 
 In progress, please hold c:
 
-## Conclusion
+# Conclusion
 
 You did it! Congratulations!
 
