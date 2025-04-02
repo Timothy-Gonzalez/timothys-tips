@@ -77,7 +77,91 @@ This first part ensures you know the python basics - do not skip this! If you st
 
 # 3.2 Checkpoint 2
 
-In progress, please hold c:
+## 3.2.1 Length Extension
+
+- First, make sure you understand how length extension attacks work.
+  The handout has an example you should follow to be familiar with how to do so in python.
+- Your program is given query, command, and output files
+- Your goal is extend the normal query to have a third, malicious command
+- You can't just send this because token is a hash of the password and query combined, so you can't generate your own hash
+- Instead, you have to extend the existing one
+- To do this correctly, you need to figure out what the original padding was, and add it to query
+  - This is because the original message when hashed had padding added to it - to do length extension you need the original content hashed
+  - Make sure you use `quote_from_bytes`, as you can't just put the bytes in a query string
+- If it's not working, **test**! Write your own tests with your own password - verify everything hashes to the same token.
+
+## 3.2.2 MD5 Collisions
+
+- MD5 is vulnerable to collisions, and they can be generated efficiently
+- Follow the handout and learn how fastcoll works
+  - fastcoll is a program that generates two suffixes to files such that the hash of each is the same
+- This allows us to have two different files with the same hash
+- Your goal is to have a good file and evil file which print different things, but have the same hash
+- Using the prefix from the handout, you can have a common prefix and suffix, but different blobs in the middle
+- The hash will remain the same because the suffix is the same, so length extension applies
+- You can generate the blob using fastcoll
+- To determine what to output, `sha256(blob.encode()).hexdigest()` will let you tell which blob is which with a common suffix
+- Once you think you have it right, good should output one output and evil should output the other.
+  The md5 of both should be the same, but sha256 different.
+
+## 3.2.3 Exploiting a Padding Oracle
+
+- Your goal is to abuse a small vulnerability - a padding oracle - to decrypt the ciphertext into plaintext without the key
+- First things first, understand how the padding works. What is valid padding? Why do we need padding?
+  - Note that there always must be padding
+- Next, understand what a padding oracle is.
+  A padding oracle means the server tells us **if the decrypted plaintext has valid padding**.
+- Therefore, if we control what we modify, we can try different inputs until we get a valid padding.
+  When we get a valid padding, **we know the plaintext has a certain output for certain bytes**.
+- **If you don't know what intermediates, ciphertext, initialization vectors, and plaintext means in RSA decryption**,
+  please look at a diagram. The next part will not make sense if you don't.
+- For example, consider ciphertext block 1 (C1) as the initialization vector for ciphertext block 2 (C2).
+  The plaintext output is determined by the xor of C1 and the intermediate values of block 2 (I2).
+  Therefore, if we modify the last byte of C1 (G) until we get valid padding, we know the last byte of the plaintext of block 2 (P2) MUST BE `0x10`.
+  That gives us `G XOR I2[15] = 0x10`, or `I2[15] = G XOR 0x10`. We can do this recursively to get all the intermediates for each block.
+- If we have the intermediates, we can get the plaintext of the key, since the intermediates are from the ciphertext being decrypted with the key!
+  Simply put, `P = I XOR IV`, or the plaintext is the intermediates xor'd with the previous block/iv.
+- If this doesn't make sense, I would recommend drawing this out, as that's what helped it click for me.
+  Otherwise, try starting and see where you go from there.
+- Some tricks to note:
+  - Each block is dependent on the previous block (initialization vector for the first block), which means you can solve in left to right or right to left order for the blocks
+  - Padding needs to be solved from right to left as guessing 1 byte is easier than guessing 15 at once
+  - Make sure you shift the padding over when moving to guessing the next byte!
+    For example: `0xa 0xb 0xc 0x10` -> `0xa 0xb 0x10 0x0f` -> `0xa 0x10 0x0f 0xe`.
+    Note that you cannot just use the same values you used before, as the padding changes.
+    To get the new values, XOR the intermediate with the new padding value.
+  - You'll know you're doing it right if the final block has padding and it forms a grammatical text.
+    If you get gibberish, try walking through it again.
+
+## 3.2.4 Creating Colliding Certificates
+
+- Certificates are effectively signed documents by a certificate authority that verify someone is who they say they are (most common use is websites (https))
+- Your goal is to generate two certificates that have different public keys but the same signature
+- Note that certain fields specified must be identical, but all others are fair game
+- Your first thought might be to just have identical prefixes, then use `fastcoll` to generate the modulus.
+  While this works, you need to be able to factor the modulus (p and q) to have a private key (and a useful certificate),
+  which you are required to prove you can do.
+- So, we have to use something called lenstra's attack
+  - This means generating two modulus which each have a pq pair but still result in the same suffix to output from fastcoll
+- Generally, you should follow the steps in the handout directly - I won't repeat them here so this remains up to date
+- Be very careful - lenstra's attack takes a long time and so tiny mistakes can result in a lot of wasted time
+- Knowing how to use `xxd` and `openssl` commands can help a lot with debugging - they are given to you!
+- Some things to note:
+  - You are provided with a certbuilder.py - use it to make your certificates and generate your keys from p and q
+  - **Make sure to use cert.tbs_certificate_bytes** when generating prefixes, aligning things, and passing values into fastcoll.
+    Only use the final `cert.public_bytes(Encoding.DER)` to output the certificate when you are done.
+  - Make sure your padding is lined up so your modulus starts a new block.
+    A sign you haven't done this is if your modulus ends up with a prefix of a lot of 0s - you can't have that in your modulus as the final key generated won't have that prefix.
+  - Serial numbers exist for certificates - make sure you set this to a fixed value and or your prefixes won't match
+- If you're stuck, look at the hex output to see what went wrong.
+  The prefix and suffix of both cert's tbs_certificate_bytes should be identical - with only a tiny difference in the modulus.
+  Obviously, they should md5 hash to the same value.
+
+# 3.3 Bonus (Optional)
+
+# 3.3.1 Mining your Ps and Qs
+
+TODO: All I can say is I hope you like white papers.
 
 # Conclusion
 
