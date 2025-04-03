@@ -161,7 +161,25 @@ This first part ensures you know the python basics - do not skip this! If you st
 
 # 3.3.1 Mining your Ps and Qs
 
-TODO: All I can say is I hope you like white papers.
+- This bonus is harder than the others, but not awful. The difficulty comes from the need to implement batch_gcd.
+- You are given a list of moduli
+  - Remember from before that the public key (moduli) is the multiplication of two large primes p and q (m = p * q)
+- Typically, this wouldn't be very helpful as each encryption should use different ps and qs
+- However, in this case, some of those primes are shared.
+  Normally, factoring a single moduli would take forever, keeping encryption secure.
+  The vulnerability comes from the fact that finding the gcd between two moduli is very fast.
+  If a prime is shared between two moduli, it will be the gcd of them.
+- So, your goal is to find the gcd between each moduli, and for each gcd that isn't 1, try it as a key to decrypt
+- The problem is, there's 10,000 of them, and 10,000 * 10,000 pairs does not scale to be fast enough to solve (in 2 weeks)
+- Therefore, you need to read the whitepaper provided (or look up batch gcd) to learn how to find gcd of all of these pairs efficiently
+- I won't explain how batch gcd works here, but a helpful guide can be found at https://facthacks.cr.yp.to/batchgcd.html
+- Some tips:
+  - Finding the gcds can take a while, but if you optimize your code it took me ~5 minutes on the course vm
+  - Once you have the gcds, finding the q is as easy as moduli / gcd. (gcd is p)
+  - Private keys are computed as `number.inverse(e, (p - 1) * (q - 1))`
+  - Try every pair until you get no errors, then you should have the plaintext
+- **The most important thing is to test each part of the batch_gcd algorithm**. Test the product tree, remainders, and gcd.
+  You do not want to waste hours just to learn you did your math wrong - test on a small array of data to verify everything works.
 
 # Conclusion
 
