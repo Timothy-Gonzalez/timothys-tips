@@ -15,6 +15,7 @@
   Notably, **this includes the resources on the MP handout!** Generally, **you should know**:
   - What the layers of the internet and how do they depend on each other?
   - What is TCP? What is TLS?
+  - What is a MITM attack? What is ARP? What is ARP Spoofing?
   - What is Wireshark? How do you use it?
   - What is tcpdump? How do you use it?
   - What is dig & curl? How do you use them?
@@ -58,7 +59,96 @@ First things first, follow the setup instructions in the handout to setup your v
 
 # 4.2 Checkpoint 2
 
-Coming soon!
+**It will be very helpful to know wireshark for this checkpoint!**
+Make sure you do, as there's no error messages - it just won't work. If you use wireshark, you can see where things went wrong.
+
+## 4.2.1 MITM attacks
+
+There are two MITM parts you are required to implement. The first is much easier than the second.
+
+### 4.2.1.1 ARP Spoofing
+
+- The goal is this part is a passive MITM - you aren't modifying packets, just extracting data out of them
+- To do this, you redirect all traffic so that it flows to you,
+  and then you are responsible for forwarding the data unmodified to the proper destination
+- To redirect traffic, you need to use ARP Spoofing
+  - ARP requests and responses are how the network attaches a device (hardware mac address) to an ip (network address)
+  - ARP spoofing is sending out fake responses to attach all ips to your own controlled device
+  - This allows you to intercept all packets and do whatever you want
+- The starter code is pretty nice - note that you only need to spoof entries that you are interested in inspecting.
+  For example, the server will never make a DNS call, so we don't need to spoof that entry.
+- To check if arp spoofing works, you can use `arp -n` on the client
+- **Make sure to reset arp tables to the original entries on exit**
+- After you have traffic flowing through, you should be able to log packets and see a bunch of traffic
+- Note: Since all packets go to you now, they will never reach their proper destination unless you send them on
+- Additionally, the intercept function will also intercept packets you send,
+  so **make sure not to resend packets you send** or you'll enter recursive hell
+    - You can do this by simple checking the sending hardware address isn't the attackerMAC
+- Once you have all traffic flowing through normally (verify with wireshark), you should begin to extract data
+- DNS requests should be very simple to parse, though the docs aren't great
+- For the session, it's in a HTTP header
+- For the cookie, it's encoded in base64, out of which you need to get the password
+- **Verify everything looks the same in wireshark with and without your arp spoofing active**
+  - It's normal to see 2 "duplicate" packets in wireshark, since wireshark will see the packet to attacker and from attacker
+    - You can set a capture filter of `ether src host attackerMAC` to only see packets you send,
+      which will make it much clearer what is actually errors vs wireshark not understanding
+      (note capture filters are different from display filters)
+
+### 4.2.1.2 Script Injection
+
+- **Important note:** This problem requires a good understanding of how seq/ack numbers work and how to use them.
+  I recommend **starting with 4.2.2 (Mitnick) first** since it's a better starting point - this part is the hardest of the 3.
+- For this part, you want to use the same ARP spoofing to perform a MITM, but this time actively modify the packets to inject 
+- Start by setting up a more simple version of the ARP spoofing you did in the previous problem.
+  This time, it's just between client and server.
+- Once you have packets flowing between them, start by injecting the script
+  - Read the directions carefully - **you need to inject the script in a very specific spot** -
+    if it's off (even by a byte/space), you'll get no credit. *(ask me how i know...)*
+  - When modifying packets, you can either modify the existing one and resend it, or create a new one from scratch.
+    I think modifying is easier, since it's easier to miss properties.
+  - Whichever way you choose, **make sure the checksums (TCP and IP) and length (IP) properties** of the packet are reset.
+    Otherwise, the server will just reject the packet.
+  - Note that HTTP you can't just change the payload, there's also a header that tells the client how much will be sent.
+    **If you don't modify this header, your modified payload will be cut off**.
+- After that's working, the hard part is next. Since you're modifying the payload of the packet, the seq and ack numbers will change.
+- For example, the server doesn't know about the extra injected content, so it will see ack numbers that are higher 
+  (since the client will ack the longer injected content)
+- **Draw out what the server and client should see**.
+  You need to simultaneously lie to both so the server thinks the client is accepting the original payload,
+  while the client thinks the server is sending the injected payload.
+- **curl working is not enough**! Also, you'll need to use wireshark anyways when nothing happens, so learn it!
+- **Verify everything looks the same in wireshark with and without your script active**
+  - Obviously, the only difference will be the seq and acks, but the client and server should successfully FIN-ACK after everything
+  - It's normal to see 2 "duplicate" packets in wireshark, since wireshark will see the packet to attacker and from attacker
+    - You can set a capture filter of `ether src host attackerMAC` to only see packets you send,
+      which will make it much clearer what is actually errors vs wireshark not understanding
+      (note capture filters are different from display filters)
+
+#### 4.2.1.2 Bonus
+
+*seriously, we need to do something about these numbers, this is worse than semver, we already know it's mp 4..., and these don't have to be 2 parts under the same category but alas...*
+
+- For this problem, you need to extend your ~~4.2.1.2~~ script injection code to work across packet boundaries
+- This means that if `</body>` occurs at the end of the packet, and there's not enough space left to fit the injection,
+  you have to span it across multiple packets
+- More tips coming soon!
+
+### 4.2.2 TCP Off-Path Session Spoofing
+
+- As a note before you start, rsh is like ssh but trust is based on specific ips instead of keys. This is less secure, obviously.
+- This attack is interesting, make sure to read the documents attached first.
+  I found [this one](https://www.giac.org/paper/gsec/1929/kevin-mitnick-hacking/100826) to be helpful.
+  **If you don't, you'll be stuck for hours because your payload is formatted wrong**.
+- This includes rsh! Know how to format the payload!
+- Notably, in our case, the trusted host is offline, you **do not need to do a DOS** attack
+- The attack essentially boils down to this: without seeing the response from the server, we need spoof a login from a trusted ip
+- Since we can't see the response, we have no way of knowing the "random" initial sequence number to ACK.
+  Thankfully, in the version we are attacking, sequence numbers are not really random.
+- First things first, you can figure out the sequence number by testing several times to see what the pattern is, and use that to predict the next one.
+- Then, without confirmation, you proceed with the rest of the connection, waiting a bit of time in between to allow the server to process
+- If all things go well, you're added to the hosts file and can do whatever now. See the handout for more details on verifying.
+- **If it doesn't work,** check wireshark. Likely you've formatted the payload wrong, or done the seq/acks wrong.
+  If any detail is wrong, it simply won't work. READ THE DOCS.
 
 # Conclusion
 
