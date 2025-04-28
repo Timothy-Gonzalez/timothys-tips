@@ -131,7 +131,15 @@ There are two MITM parts you are required to implement. The first is much easier
 - For this problem, you need to extend your ~~4.2.1.2~~ script injection code to work across packet boundaries
 - This means that if `</body>` occurs at the end of the packet, and there's not enough space left to fit the injection,
   you have to span it across multiple packets
-- More tips coming soon!
+- To see if there's enough space, you'll need to look at the Maximum Segment Size (MSS) option of the TCP layer
+  - Note that this is not the true max size, as you need to subtract the size of additional TCP options
+  - For example, MSS might be 1460 bytes, but the additional TCP options take 12 bytes, so the payload has a max size of 1448 bytes
+- You also need to handle very large injections (think 5000 bytes) that require additional packets (you can't fit that size just by modifying existing packets)
+  - Here's a helpful script to test large payloads:
+    `python3 cp2.1.http.py -i eth0 --clientIP 10.4.22.193 --serverIP 10.4.22.213 -s "alert(\"$(printf '1%.0s' {1..3000})\")"`.
+    Feel free to set 3000 to whatever number of bytes you want to test.
+- Be very careful with ack/seq numbers - anything off by one will make it not work
+- Good luck! Making your code modular will make this much easier.
 
 ### 4.2.2 TCP Off-Path Session Spoofing
 
